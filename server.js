@@ -27,6 +27,17 @@ const XOR_KEY = 'xyupizda_ochko';
 
 const usedTokens = new Set();
 
+// Форматируем ключ с учётом времени: secret + ":" + timeWindow
+function getValidKeys() {
+  const now = Date.now();
+  const interval = 60000; // 1 минута
+  const timeWindows = [
+    Math.floor(now / interval),
+    Math.floor((now - interval) / interval), // предыдущий интервал для небольшого смещения времени
+  ];
+  return timeWindows.map(w => `${SECRET_KEY}:${w}`);
+}
+
 app.get('/api', async (req, res) => {
   const username = req.query.name || 'Unknown';
   const game = req.query.game || 'Unknown';
@@ -36,16 +47,16 @@ app.get('/api', async (req, res) => {
 
   const decryptedKey = xorCrypt(fromHex(encryptedKey), XOR_KEY);
 
-  if (!SECRET_KEY || decryptedKey !== SECRET_KEY) {
+  const validKeys = getValidKeys();
+
+  if (!validKeys.includes(decryptedKey)) {
     return res.status(403).send('forbidden');
   }
 
-  // Проверяем, использовался ли токен раньше
   if (usedTokens.has(encryptedKey)) {
     return res.status(403).send('token already used');
   }
 
-  // Помечаем токен как использованный
   usedTokens.add(encryptedKey);
 
   try {

@@ -23,17 +23,16 @@ function xorCrypt(input, key) {
   return output;
 }
 
-const XOR_KEY = 'xyupizda_ochko';
+const XOR_KEY = 'xyupizda_ochko'; // your key
 
 const usedTokens = new Set();
 
-// Форматируем ключ с учётом времени: secret + ":" + timeWindow
 function getValidKeys() {
   const now = Date.now();
-  const interval = 60000; // 1 минута
+  const interval = 60000; // key time
   const timeWindows = [
     Math.floor(now / interval),
-    Math.floor((now - interval) / interval), // предыдущий интервал для небольшого смещения времени
+    Math.floor((now - interval) / interval),
   ];
   return timeWindows.map(w => `${SECRET_KEY}:${w}`);
 }
@@ -62,9 +61,9 @@ app.get('/api', async (req, res) => {
   try {
     await axios.post(WEBHOOK_URL, {
       embeds: [{
-        title: 'Игрок отправил запрос',
-        description: `**Имя:** ${username}\n**Игра:** ${game}`,
-        color: 16753920
+        title: 'someone.else log', // title
+        description: `**Name:** ${username}\n**GameName:** ${game}`, // Name + GameName
+        color: 16753920 // color
       }]
     }, {
       headers: { 'Content-Type': 'application/json' }
